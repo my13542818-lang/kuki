@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUKI — Интернет Инновации | Разработка сайтов и приложений</title>
+    <meta name="description" content="KUKI — интернет инновации. 4 года создаём сайты и приложения под ключ. Проект KUKI — доска объявлений kukiofficial.ru">
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg: #07030f;
+            --surface: #0d0718;
+            --surface-light: #150b26;
+            --text: #ffffff;
+            --text-dim: #8a7fa8;
+            --gold: #d4af6a;
+            --gold-glow: rgba(212, 175, 106, 0.35);
+            --violet: #a020f0;
+            --violet-bright: #c04cff;
+            --violet-glow: rgba(160, 32, 240, 0.4);
+            --pink: #ff2ec4;
+            --border: rgba(160, 32, 240, 0.15);
+            --border-gold: rgba(212, 175, 106, 0.25);
+            --radius: 20px;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Прогресс-бар скролла */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0;
+            height: 2px; width: 0%;
+            background: linear-gradient(90deg, var(--violet-bright), var(--gold), var(--pink));
+            z-index: 10000;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        /* Кастомный курсор */
+        .cursor {
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9999;
+            transition: transform 0.15s ease, width 0.2s, height 0.2s;
+            mix-blend-mode: difference;
+        }
+        .cursor.clicking { width: 4px; height: 4px; }
+        .cursor-follower {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(212, 175, 106, 0.5);
+            border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9998;
+            transition: transform 0.2s ease, width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+        }
+        .cursor-follower.clicking { transform: scale(0.8); }
+        @media (max-width: 1024px) {
+            .cursor, .cursor-follower { display: none; }
+        }
+
+        /* Навигация */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            padding: 20px 48px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; transition: all 0.4s ease;
+            background: rgba(7, 3, 15, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid transparent;
+        }
+        nav.scrolled {
+            padding: 14px 48px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 3, 15, 0.9);
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: var(--text);
+            position: relative; z-index: 1001;
+        }
+        .logo-img {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 0 25px var(--violet-glow);
+            transition: transform 0.4s;
+        }
+        .logo:hover .logo-img {
+            transform: rotate(-6deg) scale(1.08);
+        }
+        .logo-text { display: flex; flex-direction: column; line-height: 1; }
+        .logo-name {
+            font-family: var(--font-display);
+            font-size: 22px; font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-sub {
+            font-size: 9px; letter-spacing: 3px;
+            color: var(--text-dim);
+            font-weight: 400; text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a {
+            color: var(--text-dim); text-decoration: none;
+            font-size: 13px; font-weight: 400;
+            letter-spacing: 1px; text-transform: uppercase;
+            transition: color 0.3s; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute;
+            bottom: -6px; left: 0;
+            width: 0; height: 1px;
+            background: linear-gradient(90deg, var(--gold), var(--violet-bright));
+            transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a:hover::after { width: 100%; }
+
+        .nav-cta {
+            padding: 12px 28px;
+            background: transparent;
+            border: 1px solid var(--border-gold);
+            color: var(--gold); border-radius: 100px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            text-decoration: none;
+        }
+        .nav-cta:hover {
+            background: var(--gold); border-color: var(--gold); color: #000;
+            box-shadow: 0 0 30px var(--gold-glow);
+        }
+
+        /* Мобильное меню */
+        .burger {
+            display: none;
+            flex-direction: column; gap: 5px;
+            cursor: pointer; padding: 8px;
+            z-index: 1001;
+            background: transparent;
+            border: none;
+        }
+        .burger span {
+            width: 24px; height: 2px;
+            background: var(--text);
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        .burger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .burger.active span:nth-child(2) { opacity: 0; }
+        .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        .mobile-menu {
+            position: fixed; inset: 0;
+            background: rgba(7, 3, 15, 0.98);
+            backdrop-filter: blur(30px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 32px; z-index: 999;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+        }
+        .mobile-menu.active {
+            opacity: 1; visibility: visible;
+        }
+        .mobile-menu a {
+            font-family: var(--font-display);
+            font-size: 28px; font-weight: 700;
+            color: var(--text); text-decoration: none;
+            text-transform: uppercase; letter-spacing: 2px;
+            transition: color 0.3s;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .mobile-menu.active a {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.5s;
+        }
+        .mobile-menu.active a:nth-child(1) { transition-delay: 0.1s; }
+        .mobile-menu.active a:nth-child(2) { transition-delay: 0.15s; }
+        .mobile-menu.active a:nth-child(3) { transition-delay: 0.2s; }
+        .mobile-menu.active a:nth-child(4) { transition-delay: 0.25s; }
+        .mobile-menu.active a:nth-child(5) { transition-delay: 0.3s; }
+        .mobile-menu a:hover { color: var(--gold); }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            position: relative;
+            padding: 140px 48px 80px;
+            overflow: hidden;
+        }
+        .hero-bg-grid {
+            position: absolute; inset: 0;
+            background-image: 
+                linear-gradient(rgba(160, 32, 240, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(160, 32, 240, 0.04) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+        .hero-glow {
+            position: absolute; width: 700px; height: 700px;
+            border-radius: 50%; filter: blur(160px);
+            pointer-events: none;
+        }
+        .hero-glow.gold { background: var(--gold); top: -250px; right: -150px; opacity: 0.15; }
+        .hero-glow.violet { background: var(--violet); bottom: -350px; left: -150px; opacity: 0.25; }
+        .hero-glow.pink { background: var(--pink); top: 40%; left: 40%; width: 400px; height: 400px; opacity: 0.08; }
+
+        .hero-content {
+            max-width: 1400px; margin: 0 auto; width: 100%;
+            position: relative; z-index: 2;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 8px 20px;
+            border: 1px solid var(--border-gold);
+            border-radius: 100px;
+            font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 40px;
+            opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px; background: #28c840;
+            border-radius: 50%; animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #28c840;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(44px, 6vw, 92px);
+            font-weight: 800; line-height: 0.98;
+            letter-spacing: -0.03em; margin-bottom: 32px;
+        }
+        .hero-title .line { display: block; overflow: hidden; }
+        .hero-title .line span {
+            display: block; opacity: 0; transform: translateY(100%);
+            animation: revealText 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .hero-title .line:nth-child(1) span { animation-delay: 0.3s; }
+        .hero-title .line:nth-child(2) span { animation-delay: 0.45s; }
+        .hero-title .line:nth-child(3) span { animation-delay: 0.6s; }
+        .hero-title .accent {
+            background: linear-gradient(135deg, var(--pink), var(--violet-bright), var(--gold));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 5s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes revealText { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-desc {
+            max-width: 520px; color: var(--text-dim);
+            font-size: 16px; line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .hero-actions {
+            display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 20px 40px;
+            background: linear-gradient(135deg, var(--gold), #b8924a);
+            color: #000;
+            border: none; border-radius: 100px;
+            font-family: var(--font-body);
+            font-size: 13px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            cursor: pointer; transition: all 0.4s;
+            display: inline-flex; align-items: center; gap: 12px;
+            text-decoration: none;
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::before {
+            content: ''; position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        .btn-primary:hover::before { left: 100%; }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 45px var(--gold-glow);
+        }
+        .btn-primary i { transition: transform 0.3s; }
+        .btn-primary:hover i { transform: translateX(5px); }
+
+        .btn-ghost {
+            padding: 20px 40px;
+            background: transparent; color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            cursor: pointer; transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 12px;
+        }
+        .btn-ghost:hover {
+            border-color: var(--violet-bright);
+            color: var(--violet-bright);
+            box-shadow: 0 0 30px var(--violet-glow);
+        }
+
+        /* Логотип в hero */
+        .hero-visual {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; animation: fadeUp 1s 0.8s forwards;
+        }
+        .hero-logo-wrap {
+            position: relative;
+            width: 100%; max-width: 420px;
+            aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s ease-out;
+        }
+        .hero-logo-glow {
+            position: absolute; inset: -30px;
+            background: radial-gradient(circle, var(--violet) 0%, var(--pink) 40%, transparent 70%);
+            filter: blur(60px);
+            opacity: 0.6;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        .hero-logo {
+            position: relative;
+            width: 100%; height: 100%;
+            border-radius: 32px;
+            object-fit: cover;
+            box-shadow: 
+                0 30px 80px rgba(160, 32, 240, 0.5),
+                0 0 0 1px rgba(212, 175, 106, 0.2);
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        .hero-stats {
+            display: flex; gap: 48px;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        .hero-stat-value {
+            font-family: var(--font-display);
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--violet-bright));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .hero-stat-label {
+            font-size: 12px; color: var(--text-dim);
+            letter-spacing: 1.5px; text-transform: uppercase;
+        }
+
+        .scroll-indicator {
+            position: absolute; bottom: 40px; left: 48px;
+            display: flex; align-items: center; gap: 16px;
+            color: var(--text-dim);
+            font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            opacity: 0; animation: fadeUp 1s 1.5s forwards;
+        }
+        .scroll-line {
+            width: 40px; height: 1px;
+            background: linear-gradient(to right, var(--gold), transparent);
+            animation: scrollLine 2s infinite;
+        }
+        @keyframes scrollLine {
+            0% { transform: scaleX(0); transform-origin: left; }
+            50% { transform: scaleX(1); transform-origin: left; }
+            51% { transform: scaleX(1); transform-origin: right; }
+            100% { transform: scaleX(0); transform-origin: right; }
+        }
+
+        /* Секции */
+        section { padding: 140px 48px; position: relative; }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Анимация появления секций */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 80px; gap: 40px; flex-wrap: wrap;
+        }
+        .section-label {
+            font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .section-label::before {
+            content: ''; width: 30px; height: 1px;
+            background: linear-gradient(90deg, var(--gold), var(--violet-bright));
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 5vw, 68px);
+            font-weight: 700; line-height: 1.05;
+            letter-spacing: -0.02em;
+        }
+        .section-title .accent {
+            background: linear-gradient(135deg, var(--violet-bright), var(--pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-desc {
+            max-width: 420px; color: var(--text-dim); font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* Услуги */
+        .services-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+        }
+        .service-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 48px;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        .service-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--violet-bright), var(--gold), transparent);
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .service-card::after {
+            content: ''; position: absolute;
+            top: -50%; right: -50%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
+            opacity: 0; filter: blur(60px);
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(160, 32, 240, 0.4);
+            background: var(--surface-light);
+        }
+        .service-card:hover::before { opacity: 1; }
+        .service-card:hover::after { opacity: 0.4; }
+
+        .service-icon {
+            width: 64px; height: 64px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(160, 32, 240, 0.15), rgba(212, 175, 106, 0.1));
+            border: 1px solid rgba(160, 32, 240, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: var(--gold);
+            margin-bottom: 32px; transition: all 0.4s;
+            position: relative; z-index: 1;
+        }
+        .service-card:hover .service-icon {
+            background: linear-gradient(135deg, var(--violet), var(--gold));
+            color: #fff;
+            transform: rotate(-6deg) scale(1.05);
+            box-shadow: 0 10px 30px var(--violet-glow);
+        }
+        .service-title {
+            font-family: var(--font-display);
+            font-size: 26px; font-weight: 700;
+            margin-bottom: 16px; letter-spacing: -0.01em;
+            position: relative; z-index: 1;
+        }
+        .service-desc {
+            color: var(--text-dim); font-size: 15px;
+            line-height: 1.7; margin-bottom: 28px;
+            position: relative; z-index: 1;
+        }
+        .service-tags { display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 1; }
+        .tag {
+            padding: 6px 14px;
+            background: rgba(160, 32, 240, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 11px; color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        /* Проект */
+        .project-featured {
+            background: linear-gradient(135deg, var(--surface) 0%, #1a0a2e 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius);
+            padding: 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .project-featured::before {
+            content: ''; position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
+            opacity: 0.3; filter: blur(80px);
+        }
+        .project-featured::after {
+            content: ''; position: absolute;
+            bottom: -100px; left: -100px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, var(--pink) 0%, transparent 70%);
+            opacity: 0.2; filter: blur(80px);
+        }
+
+        .project-featured-content { position: relative; z-index: 2; }
+        .project-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px;
+            background: rgba(212, 175, 106, 0.1);
+            border: 1px solid var(--border-gold);
+            border-radius: 100px;
+            font-size: 11px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--gold);
+            margin-bottom: 24px;
+        }
+        .project-featured-title {
+            font-family: var(--font-display);
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 800; line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+        .project-featured-title .accent {
+            background: linear-gradient(135deg, var(--gold), var(--violet-bright));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .project-featured-desc {
+            color: var(--text-dim); font-size: 16px;
+            line-height: 1.8; margin-bottom: 32px;
+            max-width: 480px;
+        }
+        .project-link {
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 18px 36px;
+            background: transparent;
+            border: 1px solid var(--border-gold);
+            border-radius: 100px;
+            color: var(--gold); text-decoration: none;
+            font-size: 13px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            transition: all 0.3s;
+        }
+        .project-link:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 15px 40px var(--gold-glow);
+        }
+        .project-link i { transition: transform 0.3s; }
+        .project-link:hover i { transform: translateX(5px) rotate(-45deg); }
+
+        .project-visual {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .project-mockup {
+            width: 100%; max-width: 380px;
+            aspect-ratio: 3/4;
+            border-radius: 24px;
+            background: linear-gradient(145deg, #1a0a2e, #0d0718);
+            border: 1px solid var(--border-gold);
+            padding: 24px;
+            box-shadow: 
+                0 40px 80px rgba(160, 32, 240, 0.3),
+                inset 0 0 60px rgba(160, 32, 240, 0.1);
+            transform: rotate(-3deg);
+            transition: transform 0.5s;
+        }
+        .project-mockup:hover { transform: rotate(0deg) scale(1.02); }
+
+        .mockup-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mockup-dot.red { background: #ff5f57; }
+        .mockup-dot.yellow { background: #febc2e; }
+        .mockup-dot.green { background: #28c840; }
+        .mockup-title {
+            font-size: 11px; color: var(--text-dim);
+            margin-left: auto; letter-spacing: 1px;
+        }
+        .mockup-body { display: flex; flex-direction: column; gap: 12px; }
+        .mockup-line {
+            height: 12px; border-radius: 6px;
+            background: linear-gradient(90deg, rgba(160, 32, 240, 0.3), rgba(212, 175, 106, 0.15));
+        }
+        .mockup-line.w-60 { width: 60%; }
+        .mockup-line.w-80 { width: 80%; }
+        .mockup-line.w-40 { width: 40%; }
+        .mockup-card {
+            margin-top: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(160, 32, 240, 0.08);
+            border: 1px solid var(--border);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .mockup-card-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(212, 175, 106, 0.15);
+            border-radius: 100px;
+            font-size: 9px; color: var(--gold);
+            letter-spacing: 1px; text-transform: uppercase;
+            width: fit-content;
+        }
+        .mockup-price {
+            font-family: var(--font-display);
+            font-size: 20px; font-weight: 800;
+            color: var(--gold);
+        }
+
+        /* Почему мы */
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .why-card {
+            padding: 40px 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .why-card::before {
+            content: ''; position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(160, 32, 240, 0.05), transparent);
+            transition: left 0.6s;
+        }
+        .why-card:hover::before { left: 100%; }
+        .why-card:hover {
+            border-color: var(--border-gold);
+            transform: translateY(-5px);
+        }
+        .why-num {
+            font-family: var(--font-display);
+            font-size: 14px; color: var(--gold);
+            letter-spacing: 2px; margin-bottom: 40px;
+        }
+        .why-title {
+            font-family: var(--font-display);
+            font-size: 22px; font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .why-desc { color: var(--text-dim); font-size: 14px; line-height: 1.7; }
+
+        /* Процесс */
+        .process-list { display: flex; flex-direction: column; }
+        .process-item {
+            display: grid; grid-template-columns: 80px 1fr 1.5fr;
+            gap: 40px; padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.4s; align-items: start;
+        }
+        .process-item:first-child { border-top: 1px solid var(--border); }
+        .process-item:hover { padding-left: 20px; border-color: var(--gold); }
+        .process-num {
+            font-family: var(--font-display);
+            font-size: 40px; font-weight: 800;
+            color: var(--text-dim); line-height: 1;
+            transition: color 0.4s;
+        }
+        .process-item:hover .process-num { color: var(--gold); }
+        .process-title {
+            font-family: var(--font-display);
+            font-size: 22px; font-weight: 600;
+        }
+        .process-desc { color: var(--text-dim); font-size: 15px; line-height: 1.7; }
+
+        /* Контакты */
+        .contact {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .contact::before {
+            content: ''; position: absolute;
+            top: -200px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
+            opacity: 0.15; filter: blur(100px);
+            pointer-events: none;
+        }
+        .contact-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 80px; align-items: start;
+            position: relative; z-index: 2;
+        }
+        .contact-info h2 {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 4.5vw, 60px);
+            font-weight: 700; line-height: 1.05;
+            margin-bottom: 24px; letter-spacing: -0.02em;
+        }
+        .contact-info h2 .accent {
+            background: linear-gradient(135deg, var(--gold), var(--violet-bright));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .contact-info p {
+            color: var(--text-dim); font-size: 16px;
+            line-height: 1.8; margin-bottom: 48px; max-width: 450px;
+        }
+        .contact-details { display: flex; flex-direction: column; gap: 16px; }
+        .contact-item {
+            display: flex; align-items: center; gap: 16px;
+            color: var(--text); text-decoration: none;
+            transition: color 0.3s;
+            padding: 16px 20px;
+            background: rgba(160, 32, 240, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        .contact-item:hover {
+            color: var(--gold);
+            border-color: var(--border-gold);
+            background: rgba(212, 175, 106, 0.05);
+        }
+        .contact-item i {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(160, 32, 240, 0.2), rgba(212, 175, 106, 0.15));
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: var(--gold);
+            flex-shrink: 0;
+        }
+        .contact-item-text { display: flex; flex-direction: column; }
+        .contact-item-label {
+            font-size: 11px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+        .contact-item-value { font-size: 15px; font-weight: 500; }
+
+        /* Форма */
+        .form {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 48px; position: relative; overflow: hidden;
+        }
+        .form::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--violet-bright), var(--gold), transparent);
+        }
+        .form-title {
+            font-family: var(--font-display);
+            font-size: 26px; font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .form-sub {
+            color: var(--text-dim); font-size: 14px;
+            margin-bottom: 32px;
+        }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label {
+            display: block; font-size: 11px;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text-dim); margin-bottom: 10px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group textarea {
+            width: 100%; background: transparent;
+            border: none; border-bottom: 1px solid var(--border);
+            padding: 14px 0; color: var(--text);
+            font-family: var(--font-body); font-size: 15px;
+            outline: none; transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-bottom-color: var(--gold);
+        }
+        .form-group input.error,
+        .form-group textarea.error {
+            border-bottom-color: #ff4c4c;
+        }
+        .form-group textarea { resize: vertical; min-height: 90px; }
+
+        /* Валидация email в реальном времени */
+        .email-hint {
+            font-size: 11px;
+            margin-top: 6px;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+        .email-hint.valid { display: block; color: #28c840; }
+        .email-hint.invalid { display: block; color: #ff4c4c; }
+
+        /* Кастомные чипы */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .chip {
+            padding: 10px 18px;
+            background: rgba(160, 32, 240, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            user-select: none;
+            letter-spacing: 0.3px;
+        }
+        .chip:hover {
+            border-color: var(--border-gold);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+        .chip.active {
+            background: linear-gradient(135deg, rgba(160, 32, 240, 0.25), rgba(212, 175, 106, 0.2));
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 20px rgba(212, 175, 106, 0.2);
+        }
+        .chip.active::before {
+            content: '✓';
+            font-size: 10px;
+            margin-right: 6px;
+            color: var(--gold);
+        }
+        .chip.error {
+            border-color: #ff4c4c;
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .hidden-input { display: none; }
+
+        .form-submit {
+            width: 100%; padding: 20px;
+            background: linear-gradient(135deg, var(--gold), #b8924a);
+            color: #000;
+            border: none; border-radius: 100px;
+            font-family: var(--font-body);
+            font-size: 13px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            cursor: pointer; transition: all 0.4s;
+            margin-top: 12px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px;
+            position: relative; overflow: hidden;
+        }
+        .form-submit::before {
+            content: ''; position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        .form-submit:hover:not(:disabled)::before { left: 100%; }
+        .form-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px var(--gold-glow);
+        }
+        .form-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .form-status {
+            margin-top: 16px; padding: 14px 20px;
+            border-radius: 12px; font-size: 14px;
+            display: none; text-align: center;
+        }
+        .form-status.success {
+            display: block;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #7cff7c;
+        }
+        .form-status.error {
+            display: block;
+            background: rgba(255, 76, 76, 0.1);
+            border: 1px solid rgba(255, 76, 76, 0.3);
+            color: #ff7c7c;
+        }
+
+        /* Кнопка "Наверх" */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet), var(--gold));
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            z-index: 998;
+            opacity: 0; visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s;
+            box-shadow: 0 10px 30px var(--violet-glow);
+        }
+        .scroll-top.visible {
+            opacity: 1; visibility: visible;
+            transform: translateY(0);
+        }
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--gold-glow);
+        }
+
+        /* Футер */
+        footer {
+            padding: 60px 48px 40px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+        .footer-content {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 40px; flex-wrap: wrap;
+        }
+        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-brand img { width: 40px; height: 40px; border-radius: 10px; }
+        .footer-brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+        .footer-brand-name {
+            font-family: var(--font-display);
+            font-size: 18px; font-weight: 800;
+        }
+        .footer-brand-sub {
+            font-size: 10px; letter-spacing: 2px;
+            color: var(--text-dim); text-transform: uppercase;
+        }
+        .footer-copy { color: var(--text-dim); font-size: 13px; }
+        .footer-copy a {
+            color: var(--gold); text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        .footer-copy a:hover { opacity: 0.7; }
+
+        /* Мобильная адаптация */
+        @media (max-width: 1024px) {
+            .hero-content { grid-template-columns: 1fr; gap: 60px; }
+            .hero-visual { max-width: 380px; margin: 0 auto; }
+            .project-featured { grid-template-columns: 1fr; gap: 40px; padding: 40px; }
+            .contact-grid { grid-template-columns: 1fr; gap: 60px; }
+            .why-grid { grid-template-columns: 1fr 1fr; }
+            .burger { display: flex; }
+            .nav-links, .nav-cta { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 16px 20px; }
+            nav.scrolled { padding: 12px 20px; }
+            .hero { padding: 120px 20px 60px; }
+            section { padding: 80px 20px; }
+            .scroll-indicator { left: 20px; bottom: 20px; }
+            .services-grid { grid-template-columns: 1fr; }
+            .service-card { padding: 32px; }
+            .why-grid { grid-template-columns: 1fr; }
+            .process-item { grid-template-columns: 1fr; gap: 12px; }
+            .hero-stats { gap: 24px; flex-wrap: wrap; }
+            .hero-stat-value { font-size: 28px; }
+            .project-featured { padding: 32px 24px; }
+            .form { padding: 32px 24px; }
+            .section-header { margin-bottom: 48px; }
+            .btn-primary, .btn-ghost { padding: 16px 28px; font-size: 12px; }
+            footer { padding: 40px 20px 30px; }
+            .footer-content { flex-direction: column; text-align: center; }
+            .scroll-top { bottom: 20px; right: 20px; width: 44px; height: 44px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Прогресс-бар -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Курсор -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Мобильное меню -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#services">Услуги</a>
+        <a href="#project">Проект</a>
+        <a href="#why">О нас</a>
+        <a href="#process">Процесс</a>
+        <a href="#contact">Контакты</a>
+    </div>
+
+    <!-- Навигация -->
+    <nav id="nav">
+        <a href="#" class="logo">
+            <img src="logo.png" alt="KUKI" class="logo-img" onerror="this.style.display='none'">
+            <div class="logo-text">
+                <span class="logo-name">KUKI</span>
+                <span class="logo-sub">Интернет инновации</span>
+            </div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#services">Услуги</a></li>
+            <li><a href="#project">Проект</a></li>
+            <li><a href="#why">О нас</a></li>
+            <li><a href="#process">Процесс</a></li>
+            <li><a href="#contact">Контакты</a></li>
+        </ul>
+        <a href="#contact" class="nav-cta">Обсудить проект</a>
+        <button class="burger" id="burger" aria-label="Меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg-grid"></div>
+        <div class="hero-glow gold"></div>
+        <div class="hero-glow violet"></div>
+        <div class="hero-glow pink"></div>
+
+        <div class="hero-content">
+            <div>
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Свободны для новых проектов
+                </div>
+                <h1 class="hero-title">
+                    <span class="line"><span>Создаём</span></span>
+                    <span class="line"><span class="accent">интернет-</span></span>
+                    <span class="line"><span>инновации</span></span>
+                </h1>
+                <p class="hero-desc">
+                    KUKI — студия разработки сайтов и приложений под ключ. 
+                    Берём проект целиком — от идеи и дизайна до запуска и поддержки. 
+                    Или пишем только код, если у вас уже есть команда.
+                </p>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn-primary magnetic">
+                        Обсудить проект
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#project" class="btn-ghost magnetic">
+                        Наш проект
+                        <i class="fas fa-arrow-down"></i>
+                    </a>
+                </div>
+
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-value" data-count="4" data-suffix="+">0+</div>
+                        <div class="hero-stat-label">года опыта</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value" data-count="2" data-suffix="">0</div>
+                        <div class="hero-stat-label">формата работы</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-value" data-count="100" data-suffix="%">0%</div>
+                        <div class="hero-stat-label">под ключ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="hero-logo-wrap" id="heroLogoWrap">
+                    <div class="hero-logo-glow"></div>
+                    <img src="logo.png" alt="KUKI" class="hero-logo" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="scroll-line"></div>
+            Листайте вниз
+        </div>
+    </section>
+
+    <!-- Услуги -->
+    <section id="services">
+        <div class="container">
+            <div class="section-header reveal">
+                <div>
+                    <div class="section-label">Что мы делаем</div>
+                    <h2 class="section-title">Разработка <span class="accent">под ключ</span><br>или отдельный код</h2>
+                </div>
+                <p class="section-desc">
+                    Два формата сотрудничества: полный цикл разработки или 
+                    подключение к вашему проекту на конкретном этапе.
+                </p>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card reveal tilt">
+                    <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3 class="service-title">Сайты под ключ</h3>
+                    <p class="service-desc">
+                        Лендинги, корпоративные сайты, интернет-магазины, веб-сервисы. 
+                        Проектируем, дизайним, разрабатываем и запускаем.
+                    </p>
+                    <div class="service-tags">
+                        <span class="tag">Лендинг</span>
+                        <span class="tag">Корпоративный сайт</span>
+                        <span class="tag">Магазин</span>
+                        <span class="tag">Веб-сервис</span>
+                    </div>
+                </div>
+
+                <div class="service-card reveal tilt">
+                    <div class="service-icon"><i class="fas fa-mobile-screen-button"></i></div>
+                    <h3 class="service-title">Приложения под ключ</h3>
+                    <p class="service-desc">
+                        Мобильные и веб-приложения: от прототипа и UX-логики 
+                        до публикации в сторах и передачи поддержки.
+                    </p>
+                    <div class="service-tags">
+                        <span class="tag">iOS</span>
+                        <span class="tag">Android</span>
+                        <span class="tag">Web App</span>
+                        <span class="tag">MVP</span>
+                    </div>
+                </div>
+
+                <div class="service-card reveal tilt">
+                    <div class="service-icon"><i class="fas fa-code"></i></div>
+                    <h3 class="service-title">Разработка кода</h3>
+                    <p class="service-desc">
+                        Подключаемся к вашему проекту и пишем только код. 
+                        Работаем по вашему ТЗ, дизайну или прототипу.
+                    </p>
+                    <div class="service-tags">
+                        <span class="tag">Frontend</span>
+                        <span class="tag">Backend</span>
+                        <span class="tag">API</span>
+                        <span class="tag">Интеграции</span>
+                    </div>
+                </div>
+
+                <div class="service-card reveal tilt">
+                    <div class="service-icon"><i class="fas fa-pen-ruler"></i></div>
+                    <h3 class="service-title">Дизайн и UX</h3>
+                    <p class="service-desc">
+                        Проектируем интерфейсы, которые понятны пользователю 
+                        и решают задачи бизнеса. UI/UX, брендинг, прототипы.
+                    </p>
+                    <div class="service-tags">
+                        <span class="tag">UI/UX</span>
+                        <span class="tag">Прототип</span>
+                        <span class="tag">Дизайн-система</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Проект -->
+    <section id="project">
+        <div class="container">
+            <div class="section-header reveal">
+                <div>
+                    <div class="section-label">Наш проект</div>
+                    <h2 class="section-title">Собственная <span class="accent">разработка</span></h2>
+                </div>
+                <p class="section-desc">
+                    Мы не только делаем сайты для клиентов, но и развиваем 
+                    собственный продукт — KUKI доска объявлений.
+                </p>
+            </div>
+
+            <div class="project-featured reveal">
+                <div class="project-featured-content">
+                    <div class="project-badge">
+                        <i class="fas fa-star"></i>
+                        Собственный продукт
+                    </div>
+                    <h3 class="project-featured-title">
+                        KUKI <span class="accent">доска объявлений</span>
+                    </h3>
+                    <p class="project-featured-desc">
+                        Полноценная платформа для размещения и поиска объявлений. 
+                        Собственная разработка KUKI — от идеи и дизайна до backend-архитектуры 
+                        и запуска. Живой пример того, как мы делаем продукты.
+                    </p>
+                    <a href="https://kukiofficial.ru" target="_blank" rel="noopener" class="project-link magnetic">
+                        Перейти на сайт
+                        <i class="fas fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+
+                <div class="project-visual">
+                    <div class="project-mockup">
+                        <div class="mockup-header">
+                            <span class="mockup-dot red"></span>
+                            <span class="mockup-dot yellow"></span>
+                            <span class="mockup-dot green"></span>
+                            <span class="mockup-title">kukiofficial.ru</span>
+                        </div>
+                        <div class="mockup-body">
+                            <div class="mockup-line w-60"></div>
+                            <div class="mockup-line w-40"></div>
+                            <div class="mockup-card">
+                                <span class="mockup-card-tag">Объявление</span>
+                                <div class="mockup-line w-80"></div>
+                                <div class="mockup-price">Доска объявлений</div>
+                            </div>
+                            <div class="mockup-card">
+                                <span class="mockup-card-tag">Категория</span>
+                                <div class="mockup-line w-60"></div>
+                                <div class="mockup-line w-40"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Почему мы -->
+    <section id="why">
+        <div class="container">
+            <div class="section-header reveal">
+                <div>
+                    <div class="section-label">Почему KUKI</div>
+                    <h2 class="section-title">4 года <span class="accent">в digital</span></h2>
+                </div>
+                <p class="section-desc">
+                    За это время мы поняли главное: клиенту нужен результат, 
+                    а не процесс. Поэтому работаем прозрачно и по делу.
+                </p>
+            </div>
+
+            <div class="why-grid">
+                <div class="why-card reveal">
+                    <div class="why-num">01</div>
+                    <h3 class="why-title">Под ключ</h3>
+                    <p class="why-desc">
+                        Берём весь проект: аналитика, дизайн, разработка, 
+                        тестирование, запуск. Вам не нужно искать отдельных подрядчиков.
+                    </p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-num">02</div>
+                    <h3 class="why-title">Гибкий формат</h3>
+                    <p class="why-desc">
+                        Нужен только код? Работаем как часть вашей команды. 
+                        Нужен весь проект? Делаем под ключ.
+                    </p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-num">03</div>
+                    <h3 class="why-title">Свой продукт</h3>
+                    <p class="why-desc">
+                        Развиваем KUKI доску объявлений — значит, понимаем 
+                        разработку не только как подрядчики, но и как продуктовая команда.
+                    </p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-num">04</div>
+                    <h3 class="why-title">Прозрачность</h3>
+                    <p class="why-desc">
+                        Понятные сроки, чёткая смета, регулярные апдейты. 
+                        Без скрытых платежей и «сюрпризов» в конце.
+                    </p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-num">05</div>
+                    <h3 class="why-title">Дизайн как оружие</h3>
+                    <p class="why-desc">
+                        Делаем интерфейсы, которые продают. Красиво — это не 
+                        «дополнительно», это часть результата.
+                    </p>
+                </div>
+                <div class="why-card reveal">
+                    <div class="why-num">06</div>
+                    <h3 class="why-title">На связи</h3>
+                    <p class="why-desc">
+                        Отвечаем на письма, обсуждаем правки, остаёмся на связи 
+                        после запуска. Вам не придётся ждать ответа неделями.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Процесс -->
+    <section id="process">
+        <div class="container">
+            <div class="section-header reveal">
+                <div>
+                    <div class="section-label">Как мы работаем</div>
+                    <h2 class="section-title">Процесс <span class="accent">без хаоса</span></h2>
+                </div>
+                <p class="section-desc">
+                    Чёткие этапы, понятные сроки, прозрачная коммуникация 
+                    на каждом шаге.
+                </p>
+            </div>
+
+            <div class="process-list">
+                <div class="process-item reveal">
+                    <div class="process-num">01</div>
+                    <div class="process-title">Бриф и обсуждение</div>
+                    <div class="process-desc">
+                        Вы описываете задачу — мы задаём вопросы и уточняем детали. 
+                        На этом этапе формируем понимание объёма и сроков.
+                    </div>
+                </div>
+                <div class="process-item reveal">
+                    <div class="process-num">02</div>
+                    <div class="process-title">Оценка и план</div>
+                    <div class="process-desc">
+                        Готовим смету и план работ. Согласовываем этапы, 
+                        сроки и формат взаимодействия.
+                    </div>
+                </div>
+                <div class="process-item reveal">
+                    <div class="process-num">03</div>
+                    <div class="process-title">Дизайн / прототип</div>
+                    <div class="process-desc">
+                        Проектируем структуру и дизайн. Показываем прототип, 
+                        вносим правки до старта разработки.
+                    </div>
+                </div>
+                <div class="process-item reveal">
+                    <div class="process-num">04</div>
+                    <div class="process-title">Разработка</div>
+                    <div class="process-desc">
+                        Пишем код, тестируем, показываем промежуточные результаты. 
+                        Вы видите прогресс, а не ждёте финала.
+                    </div>
+                </div>
+                <div class="process-item reveal">
+                    <div class="process-num">05</div>
+                    <div class="process-title">Запуск и поддержка</div>
+                    <div class="process-desc">
+                        Разворачиваем проект, передаём доступы, остаёмся на связи. 
+                        При необходимости — ведём поддержку и развитие.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакты -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info reveal">
+                    <div class="section-label">Свяжитесь с нами</div>
+                    <h2>
+                        Расскажите<br>
+                        о <span class="accent">проекте</span>
+                    </h2>
+                    <p>
+                        Опишите задачу в форме — мы свяжемся с вами по email, 
+                        уточним детали и предложим решение. Отвечаем в рабочее время.
+                    </p>
+
+                    <div class="contact-details">
+                        <a href="mailto:kukiofficial@yandex.ru" class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div class="contact-item-text">
+                                <span class="contact-item-label">Email</span>
+                                <span class="contact-item-value">kukiofficial@yandex.ru</span>
+                            </div>
+                        </a>
+                        <a href="https://kukiofficial.ru" target="_blank" rel="noopener" class="contact-item">
+                            <i class="fas fa-globe"></i>
+                            <div class="contact-item-text">
+                                <span class="contact-item-label">Наш проект</span>
+                                <span class="contact-item-value">kukiofficial.ru</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <form class="form reveal" id="orderForm" action="https://formspree.io/f/mgavaagj" method="POST" novalidate>
+                    <h3 class="form-title">Оставить заявку</h3>
+                    <p class="form-sub">Заполните форму — ответим на email</p>
+
+                    <div class="form-group">
+                        <label for="name">Ваше имя</label>
+                        <input type="text" id="name" name="name" required placeholder="Как к вам обращаться">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email для связи</label>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                        <div class="email-hint" id="emailHint"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Тип проекта</label>
+                        <div class="chip-group" data-name="type">
+                            <button type="button" class="chip" data-value="Сайт под ключ">Сайт под ключ</button>
+                            <button type="button" class="chip" data-value="Приложение под ключ">Приложение</button>
+                            <button type="button" class="chip" data-value="Только разработка кода">Только код</button>
+                            <button type="button" class="chip" data-value="Дизайн / UX">Дизайн / UX</button>
+                            <button type="button" class="chip" data-value="Другое">Другое</button>
+                        </div>
+                        <input type="hidden" name="type" id="typeInput" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Бюджет <span style="text-transform:none; letter-spacing:0; opacity:0.5">(необязательно)</span></label>
+                        <div class="chip-group" data-name="budget">
+                            <button type="button" class="chip" data-value="до 50 000 ₽">до 50 тыс.</button>
+                            <button type="button" class="chip" data-value="50 000 — 150 000 ₽">50–150 тыс.</button>
+                            <button type="button" class="chip" data-value="150 000 — 500 000 ₽">150–500 тыс.</button>
+                            <button type="button" class="chip" data-value="500 000 ₽ +">500 тыс. +</button>
+                            <button type="button" class="chip" data-value="Не указан">Не указан</button>
+                        </div>
+                        <input type="hidden" name="budget" id="budgetInput" value="Не указан">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Описание задачи</label>
+                        <textarea id="message" name="message" required placeholder="Расскажите, что нужно сделать"></textarea>
+                    </div>
+
+                    <button type="submit" class="form-submit" id="submitBtn">
+                        Отправить заявку
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+
+                    <div class="form-status" id="formStatus"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="logo.png" alt="KUKI" onerror="this.style.display='none'">
+                <div class="footer-brand-text">
+                    <span class="footer-brand-name">KUKI</span>
+                    <span class="footer-brand-sub">Интернет инновации</span>
+                </div>
+            </div>
+            <div class="footer-copy">
+                © <span id="year"></span> KUKI — интернет инновации · 
+                <a href="mailto:kukiofficial@yandex.ru">kukiofficial@yandex.ru</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Кнопка "Наверх" -->
+    <button class="scroll-top" id="scrollTop" aria-label="Наверх">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Год в футере
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Прогресс-бар скролла
+        const scrollProgress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            scrollProgress.style.width = progress + '%';
+        });
+
+        // Скролл навигации
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Кнопка "Наверх"
+        const scrollTopBtn = document.getElementById('scrollTop');
+        window.addEventListener('scroll', () => {
+            scrollTopBtn.classList.toggle('visible', window.scrollY > 600);
+        });
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Мобильное меню
+        const burger = document.getElementById('burger');
+        const mobileMenu = document.getElementById('mobileMenu');
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                burger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+        if (window.matchMedia('(min-width: 1025px)').matches) {
+            let mouseX = 0, mouseY = 0;
+            let followerX = 0, followerY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`;
+            });
+
+            function animateFollower() {
+                followerX += (mouseX - followerX) * 0.15;
+                followerY += (mouseY - followerY) * 0.15;
+                follower.style.transform = `translate(${followerX - 20}px, ${followerY - 20}px)`;
+                requestAnimationFrame(animateFollower);
+            }
+            animateFollower();
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+                follower.classList.add('clicking');
+            });
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+                follower.classList.remove('clicking');
+            });
+
+            document.querySelectorAll('a, button, .service-card, .why-card, .project-link, .chip').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    follower.style.width = '60px';
+                    follower.style.height = '60px';
+                    follower.style.borderColor = 'rgba(212, 175, 106, 0.8)';
+                    follower.style.background = 'rgba(212, 175, 106, 0.05)';
+                });
+                el.addEventListener('mouseleave', () => {
+                    follower.style.width = '40px';
+                    follower.style.height = '40px';
+                    follower.style.borderColor = 'rgba(212, 175, 106, 0.5)';
+                    follower.style.background = 'transparent';
+                });
+            });
+        }
+
+        // Анимация появления секций при скролле
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, i * 80);
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // Магнитный эффект на кнопках
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.15}px, ${y * 0.3}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+            });
+        });
+
+        // Параллакс логотипа при движении мыши
+        const heroLogoWrap = document.getElementById('heroLogoWrap');
+        if (heroLogoWrap && window.matchMedia('(min-width: 1025px)').matches) {
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                heroLogoWrap.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        }
+
+        // Tilt-эффект на карточках услуг
+        document.querySelectorAll('.tilt').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                card.style.transform = `translateY(-8px) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+
+        // Анимированные счётчики
+        const counters = document.querySelectorAll('.hero-stat-value');
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseInt(el.dataset.count);
+                    const suffix = el.dataset.suffix || '';
+                    let current = 0;
+                    const duration = 1500;
+                    const step = target / (duration / 16);
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = Math.round(current) + suffix;
+                    }, 16);
+                    counterObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+        counters.forEach(c => counterObserver.observe(c));
+
+        // Кастомные чипы
+        document.querySelectorAll('.chip-group').forEach(group => {
+            const hiddenInput = group.parentElement.querySelector('input[type="hidden"]');
+            const chips = group.querySelectorAll('.chip');
+
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chips.forEach(c => c.classList.remove('active', 'error'));
+                    chip.classList.add('active');
+                    if (hiddenInput) hiddenInput.value = chip.dataset.value;
+                });
+            });
+        });
+
+        // Валидация email в реальном времени
+        const emailInput = document.getElementById('email');
+        const emailHint = document.getElementById('emailHint');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        emailInput.addEventListener('input', () => {
+            const val = emailInput.value.trim();
+            if (val === '') {
+                emailHint.className = 'email-hint';
+                emailHint.textContent = '';
+                emailInput.classList.remove('error');
+            } else if (emailRegex.test(val)) {
+                emailHint.className = 'email-hint valid';
+                emailHint.textContent = '✓ Email корректный';
+                emailInput.classList.remove('error');
+            } else {
+                emailHint.className = 'email-hint invalid';
+                emailHint.textContent = '✗ Проверьте формат email';
+                emailInput.classList.add('error');
+            }
+        });
+
+        // Отправка формы
+        const form = document.getElementById('orderForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formStatus = document.getElementById('formStatus');
+        const typeInput = document.getElementById('typeInput');
+        const typeChips = document.querySelectorAll('.chip-group[data-name="type"] .chip');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Валидация типа проекта
+            if (!typeInput.value) {
+                typeChips.forEach(c => c.classList.add('error'));
+                formStatus.textContent = '⚠ Выберите тип проекта';
+                formStatus.className = 'form-status error';
+                setTimeout(() => {
+                    typeChips.forEach(c => c.classList.remove('error'));
+                }, 1000);
+                return;
+            }
+
+            // Валидация email
+            if (!emailRegex.test(emailInput.value.trim())) {
+                emailInput.classList.add('error');
+                formStatus.textContent = '⚠ Проверьте email';
+                formStatus.className = 'form-status error';
+                return;
+            }
+
+            const formData = new FormData(form);
+            const originalBtnHTML = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Отправка... <i class="fas fa-spinner fa-spin"></i>';
+            formStatus.className = 'form-status';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    formStatus.textContent = '✓ Заявка отправлена! Мы свяжемся с вами по email.';
+                    formStatus.classList.add('success');
+                    form.reset();
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    document.getElementById('budgetInput').value = 'Не указан';
+                    document.getElementById('typeInput').value = '';
+                    emailHint.className = 'email-hint';
+                    submitBtn.innerHTML = 'Отправлено <i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalBtnHTML;
+                        submitBtn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error('Ошибка');
+                }
+            } catch (error) {
+                formStatus.textContent = '✗ Не удалось отправить. Напишите на kukiofficial@yandex.ru';
+                formStatus.classList.add('error');
+                submitBtn.innerHTML = originalBtnHTML;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Плавный скролл
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
